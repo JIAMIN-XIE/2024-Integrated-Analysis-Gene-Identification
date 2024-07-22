@@ -1,0 +1,91 @@
+---
+title: "Gene Expression levels in different trophoblast states and separation of Different Placenta Biological Sexes"
+author: "JIAMIN XIE"
+date: "02/07/2023"
+output: html_document
+---
+
+```{r}
+library                  (Seurat)
+library                  (Matrix)
+library                  (dplyr)
+library                  (ggplot2)
+library                  (cowplot)
+library                  (tibble)
+library                  (readxl)
+library                  (sctransform)
+library                  (fields)
+library                  (KernSmooth)
+library                  (ROCR)
+library                  (parallel)
+library                  (reshape2)
+library                  (pheatmap)
+library                  (DoubletFinder)
+library                  (limma)
+library                  (SeuratWrappers)
+library                  (SeuratDisk)
+library                  (plotly)
+library                  (clustree)
+library                  (velocyto.R)
+library                  (MAST)
+library                  (EnhancedVolcano)
+library                  (clusterProfiler)
+library                  (AnnotationDbi)
+library                  (org.Hs.eg.db)
+library                  (VennDiagram)
+library                  (RColorBrewer)
+library                  (ggpubr)
+library                  (plotly)
+library                  (xlsx)
+library(SeuratData)
+library(rafalib)
+library("Nebulosa")
+library("enrichR")
+library(dplyr)
+library(patchwork)
+library(tidyverse)
+library(stringr)
+```
+
+#load the integrated analysis data(Seurat Object "Trophoblasts" ) generated from GSE174481 and E-MTAB-6701, the code please see our collaborator Matthew James Shannon at https://github.com/MatthewJShannon.
+
+```{r}
+Trophblast.data<-Trophoblasts
+```
+
+# Visualize and analyze the interested gene expression levels in different trophoblast states
+```{r}
+# Analyze the differential expression of interested genes.
+# HLA-G
+HLA-G.Deg2<- markers_genes_copy %>%
+  filter_all(any_vars(str_detect(.,pattern = "HLA-G")))
+# SOX4
+SOX4.Deg2<- markers_genes_copy %>%
+  filter_all(any_vars(str_detect(.,pattern = "SOX4")))
+# UMAP HLA-G in different trophoblast states
+FeaturePlot(Trophblast.data, features = c("HLA-G"),reduction = "umap",pt.size = 0.2,label = T,label.size = 3,cols = c("lightgrey","blue"))+theme( 
+    legend.position = "right")
+# UMAP SOX4 in different trophoblast states
+FeaturePlot(Trophblast.data, features = c("SOX4"),reduction = "umap",pt.size = 0.2,label = T,label.size = 3,cols = c("lightgrey","red"))+
+theme(legend.position = "right")
+    
+```
+
+# Separate the sample in the object by sex and visualize the interested gene expression level by UMAP and Violin plot.
+```{r}
+#UMAP
+DefaultAssay (Trophblast.data) <- "RNA"
+s<-FeaturePlot  (Trophblast.data, features = c("SOX4"), min.cutoff = 0, order = TRUE, cols = c("grey", "red"), split.by = "Sex",pt.size = 0.2,label = T,label.size = 1,coord.fixed = TRUE)
+s1<-s&theme(plot.title = element_text(size=8),axis.title.y.right = element_text(size = 8),legend.position = "right")
+s1
+
+#Violin plot
+sv<- VlnPlot(Trophblast.data, features = c("SOX4"), split.by = "Sex", pt.size = 0, ncol = 1, cols = c ('Female'= "lightpink", 'Male'='steelblue3'), split.plot=TRUE,sort = "decreasing")+geom_boxplot(width=0.1, fill="white",outlier.size = 0)+xlab("cluster")+ylab("Log Exp")
+sv1<-sv&theme(plot.title = element_text(size=12),axis.title.y.right = element_text(size = 8),legend.position = "right")
+sv1
+```
+
+
+
+
+
